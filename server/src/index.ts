@@ -3,6 +3,10 @@ import express from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import authRouter from './routes/auth'
+import categoriesRouter from './routes/categories'
+import contactsRouter from './routes/contacts'
+import interactionsRouter from './routes/interactions'
+import graphRouter from './routes/graph'
 
 const app = express()
 const port = process.env.PORT ?? 3001
@@ -19,6 +23,10 @@ app.get('/health', (_req, res) => {
 })
 
 app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/categories', categoriesRouter)
+app.use('/api/v1/contacts', contactsRouter)
+app.use('/api/v1/contacts/:id/interactions', interactionsRouter)
+app.use('/api/v1/graph', graphRouter)
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
