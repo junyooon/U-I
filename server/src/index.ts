@@ -8,6 +8,7 @@ import contactsRouter from './routes/contacts'
 import interactionsRouter from './routes/interactions'
 import graphRouter from './routes/graph'
 import integrationsRouter from './routes/integrations'
+import notificationsRouter from './routes/notifications'
 
 const app = express()
 const port = process.env.PORT ?? 3001
@@ -29,6 +30,7 @@ app.use('/api/v1/contacts', contactsRouter)
 app.use('/api/v1/contacts/:id/interactions', interactionsRouter)
 app.use('/api/v1/graph', graphRouter)
 app.use('/api/v1/integrations', integrationsRouter)
+app.use('/api/v1/settings/notifications', notificationsRouter)
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`)
