@@ -7,6 +7,7 @@ interface CreateContactInput {
   email?: string | null
   phone?: string | null
   category_ids?: string[]
+  last_contact_at?: string | null
 }
 
 export interface Interaction {

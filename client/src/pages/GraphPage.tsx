@@ -4,6 +4,7 @@ import Scene from '../components/graph/Scene'
 import Sidebar from '../components/Sidebar'
 import ContactPanel from '../components/ContactPanel'
 import ShareButton from '../components/ShareButton'
+import OnboardingModal from '../components/OnboardingModal'
 import { useGraph } from '../api/hooks'
 import { useIsMobile } from '../hooks/useIsMobile'
 
@@ -15,6 +16,9 @@ export default function GraphPage() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(
+    () => !localStorage.getItem('ui_onboarding_done')
+  )
 
   function selectNode(id: string) {
     setSelectedNodeId(id)
@@ -61,6 +65,12 @@ export default function GraphPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {showOnboarding && (
+        <OnboardingModal
+          existingCategories={data.categories}
+          onComplete={() => setShowOnboarding(false)}
+        />
+      )}
       <Sidebar
         categories={data.categories}
         nodes={data.nodes}
