@@ -21,6 +21,7 @@ export interface ContactDetail {
   name: string
   email: string | null
   phone: string | null
+  notes: string | null
   category_ids: string[]
   last_contact_at: string | null
   drift_score: number
@@ -87,7 +88,7 @@ export function usePatchContact(contactId: string) {
   const token = useAuthStore((s) => s.token)
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (input: { name?: string; email?: string | null; phone?: string | null; category_ids?: string[] }) =>
+    mutationFn: (input: { name?: string; email?: string | null; phone?: string | null; notes?: string | null; category_ids?: string[] }) =>
       apiFetch(`/contacts/${contactId}`, token!, {
         method: 'PATCH',
         body: JSON.stringify(input),

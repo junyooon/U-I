@@ -49,6 +49,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
   const [editPhone, setEditPhone] = useState('')
+  const [editNotes, setEditNotes] = useState('')
   const [editCategoryIds, setEditCategoryIds] = useState<string[]>([])
 
   useEffect(() => {
@@ -89,6 +90,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
     setEditName(contact.name)
     setEditEmail(contact.email ?? '')
     setEditPhone(contact.phone ?? '')
+    setEditNotes(contact.notes ?? '')
     setEditCategoryIds(contact.category_ids)
     setEditing(true)
   }
@@ -102,6 +104,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
       name: editName.trim(),
       email: editEmail.trim() || null,
       phone: editPhone.trim() || null,
+      notes: editNotes.trim() || null,
       category_ids: editCategoryIds,
     })
     setEditing(false)
@@ -153,6 +156,11 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
                 )}
                 {!contact?.last_contact_at && (
                   <p style={{ color: '#4b5563', fontSize: '12px', marginTop: '4px' }}>Never contacted</p>
+                )}
+                {contact?.notes && (
+                  <p style={{ color: '#4b5563', fontSize: '12px', marginTop: '4px', fontStyle: 'italic' }}>
+                    {contact.notes}
+                  </p>
                 )}
               </>
             )}
@@ -256,6 +264,21 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
                   onChange={e => setEditPhone(e.target.value)}
                   placeholder="—"
                   style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Notes</label>
+                <textarea
+                  value={editNotes}
+                  onChange={e => setEditNotes(e.target.value)}
+                  placeholder="How you know them, context, etc."
+                  rows={3}
+                  style={{
+                    ...inputStyle,
+                    resize: 'vertical',
+                    lineHeight: '1.5',
+                    fontFamily: 'inherit',
+                  }}
                 />
               </div>
               {categories.length > 0 && (

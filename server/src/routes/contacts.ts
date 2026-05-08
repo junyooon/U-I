@@ -131,6 +131,7 @@ router.get('/:id', async (req, res) => {
       name: contact.name,
       phone: contact.phone,
       email: contact.email,
+      notes: contact.notes,
       category_ids: contact.contactCategories.map(cc => cc.categoryId),
       last_contact_at: contact.lastContactAt,
       drift_score: contact.driftScore,
@@ -151,6 +152,7 @@ router.patch('/:id', async (req, res) => {
     name: z.string().min(1).max(100).optional(),
     phone: z.string().max(30).nullable().optional(),
     email: z.string().email().nullable().optional(),
+    notes: z.string().nullable().optional(),
     category_ids: z.array(z.string().uuid()).optional(),
   })
 
@@ -187,6 +189,7 @@ router.patch('/:id', async (req, res) => {
       name: contact.name,
       phone: contact.phone,
       email: contact.email,
+      notes: contact.notes,
       category_ids: contact.contactCategories.map(cc => cc.categoryId),
       last_contact_at: contact.lastContactAt,
       drift_score: contact.driftScore,

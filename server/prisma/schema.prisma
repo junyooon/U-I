@@ -48,6 +48,7 @@ model Contact {
   name          String    @db.VarChar(100)
   phone         String?   @db.VarChar(30)
   email         String?   @db.VarChar(255)
+  notes         String?   @db.Text
   lastContactAt DateTime? @map("last_contact_at") @db.Timestamptz
   driftScore    Float     @default(0) @map("drift_score")
   distance      Float     @default(0)
