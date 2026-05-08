@@ -14,6 +14,7 @@ import AddPersonModal from './AddPersonModal'
 import AddCategoryModal from './AddCategoryModal'
 import NotificationSettingsModal from './NotificationSettingsModal'
 import TimelinePanel from './TimelinePanel'
+import ImportModal from './ImportModal'
 import type { Category, GraphNode } from '../types'
 
 interface Props {
@@ -34,6 +35,7 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [showNotificationSettings, setShowNotificationSettings] = useState(false)
   const [showTimeline, setShowTimeline] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [hoveredCatId, setHoveredCatId] = useState<string | null>(null)
   const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<string | null>(null)
   const [editingCatId, setEditingCatId] = useState<string | null>(null)
@@ -71,6 +73,9 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
       )}
       {showNotificationSettings && (
         <NotificationSettingsModal onClose={() => setShowNotificationSettings(false)} />
+      )}
+      {showImport && (
+        <ImportModal onClose={() => setShowImport(false)} />
       )}
       {showTimeline && (
         <TimelinePanel
@@ -116,9 +121,19 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
               </button>
             </div>
           </div>
-          <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
-            Your world of connections
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+            <p style={{ fontSize: '12px', color: '#6b7280' }}>
+              Your world of connections
+            </p>
+            <button
+              onClick={() => setShowImport(true)}
+              style={{ fontSize: '11px', color: '#4b5563', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+            >
+              Import CSV
+            </button>
+          </div>
         </div>
 
         {/* Search */}

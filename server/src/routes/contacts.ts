@@ -60,6 +60,82 @@ router.get('/', async (req, res) => {
   })
 })
 
+const IMPORT_COLORS = [
+  '#4A90D9', '#7C3AED', '#10B981', '#F59E0B',
+  '#EF4444', '#EC4899', '#06B6D4', '#F97316',
+  '#8B5CF6', '#14B8A6', '#F43F5E', '#84CC16',
+]
+
+router.post('/import', async (req, res) => {
+  const schema = z.object({
+    contacts: z.array(z.object({
+      name: z.string().min(1).max(100),
+      email: z.string().email().nullable().optional(),
+      phone: z.string().max(30).nullable().optional(),
+      notes: z.string().nullable().optional(),
+      category_names: z.array(z.string()).default([]),
+    })).min(1).max(500),
+  })
+
+  const parsed = schema.safeParse(req.body)
+  if (!parsed.success) {
+    res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'Invalid input.' } })
+    return
+  }
+
+  // Collect all unique category names from the import
+  const allCategoryNames = [...new Set(
+    parsed.data.contacts.flatMap(c => c.category_names.map(n => n.trim().toLowerCase()))
+  )].filter(Boolean)
+
+  // Fetch existing categories
+  const existingCategories = await prisma.category.findMany({
+    where: { userId: req.userId },
+  })
+  const existingByName = new Map(existingCategories.map(c => [c.name.toLowerCase(), c]))
+
+  // Create missing categories
+  const newCategoryNames = allCategoryNames.filter(n => !existingByName.has(n))
+  if (newCategoryNames.length > 0) {
+    const colorCount = existingCategories.length
+    await prisma.category.createMany({
+      data: newCategoryNames.map((name, i) => ({
+        userId: req.userId,
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        color: IMPORT_COLORS[(colorCount + i) % IMPORT_COLORS.length],
+      })),
+    })
+  }
+
+  // Re-fetch all categories now including new ones
+  const allCategories = await prisma.category.findMany({ where: { userId: req.userId } })
+  const catByName = new Map(allCategories.map(c => [c.name.toLowerCase(), c]))
+
+  // Bulk create contacts
+  let imported = 0
+  for (const row of parsed.data.contacts) {
+    const categoryIds = row.category_names
+      .map(n => catByName.get(n.trim().toLowerCase())?.id)
+      .filter((id): id is string => !!id)
+
+    await prisma.contact.create({
+      data: {
+        userId: req.userId,
+        name: row.name,
+        email: row.email ?? null,
+        phone: row.phone ?? null,
+        notes: row.notes ?? null,
+        driftScore: 0.85,
+        distance: 85,
+        contactCategories: { create: categoryIds.map(categoryId => ({ categoryId })) },
+      },
+    })
+    imported++
+  }
+
+  res.status(201).json({ imported })
+})
+
 router.post('/', async (req, res) => {
   const schema = z.object({
     name: z.string().min(1).max(100),
