@@ -40,7 +40,7 @@ export default function AddCategoryModal({ onClose }: Props) {
     >
       <div
         style={{
-          width: '360px',
+          width: '360px', maxWidth: 'calc(100vw - 32px)',
           background: '#0d0f1e',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '14px',

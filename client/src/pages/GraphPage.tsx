@@ -5,17 +5,21 @@ import Sidebar from '../components/Sidebar'
 import ContactPanel from '../components/ContactPanel'
 import ShareButton from '../components/ShareButton'
 import { useGraph } from '../api/hooks'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export default function GraphPage() {
   const { data, isLoading, error } = useGraph()
   const queryClient = useQueryClient()
+  const isMobile = useIsMobile()
   const [banner, setBanner] = useState<'connected' | 'error' | null>(null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   function selectNode(id: string) {
     setSelectedNodeId(id)
     setFocusedNodeId(id)
+    if (isMobile) setSidebarOpen(false)
   }
 
   useEffect(() => {
@@ -57,10 +61,35 @@ export default function GraphPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar categories={data.categories} nodes={data.nodes} onSelectNode={selectNode} />
+      <Sidebar
+        categories={data.categories}
+        nodes={data.nodes}
+        onSelectNode={selectNode}
+        mobileOpen={sidebarOpen}
+        onMobileClose={() => setSidebarOpen(false)}
+      />
       <div style={{ flex: 1, position: 'relative' }}>
         <Scene data={data} onSelectNode={selectNode} focusedNodeId={focusedNodeId} />
-        <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
+
+        {/* Hamburger — mobile only */}
+        {isMobile && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            style={{
+              position: 'absolute', top: '16px', left: '16px', zIndex: 10,
+              background: 'rgba(10,10,22,0.85)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              color: '#9ca3af', fontSize: '18px', lineHeight: 1,
+              padding: '8px 10px', cursor: 'pointer',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            ☰
+          </button>
+        )}
+
+        <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
           <ShareButton />
         </div>
       </div>

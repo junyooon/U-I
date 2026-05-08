@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useContact, useCreateInteraction, useDeleteInteraction, useDeleteContact, usePatchContact } from '../api/contacts'
+import { useIsMobile } from '../hooks/useIsMobile'
 import type { Category } from '../types'
 
 interface Props {
@@ -38,6 +39,7 @@ function typeLabel(type: string): string {
 }
 
 export default function ContactPanel({ contactId, categories, onClose }: Props) {
+  const isMobile = useIsMobile()
   const { data, isLoading } = useContact(contactId)
   const createInteraction = useCreateInteraction(contactId)
   const deleteInteraction = useDeleteInteraction(contactId)
@@ -119,11 +121,20 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
       />
 
       {/* Panel */}
-      <div style={{
+      <div style={isMobile ? {
         position: 'fixed',
-        top: 0,
-        right: 0,
-        bottom: 0,
+        left: 0, right: 0, bottom: 0,
+        height: '85vh',
+        zIndex: 45,
+        background: 'rgba(10,10,22,0.98)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '16px 16px 0 0',
+        display: 'flex',
+        flexDirection: 'column',
+        backdropFilter: 'blur(16px)',
+      } : {
+        position: 'fixed',
+        top: 0, right: 0, bottom: 0,
         width: '340px',
         zIndex: 45,
         background: 'rgba(10,10,22,0.97)',
@@ -132,9 +143,16 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
         flexDirection: 'column',
         backdropFilter: 'blur(16px)',
       }}>
+        {/* Drag handle — mobile only */}
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 0' }}>
+            <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.15)' }} />
+          </div>
+        )}
+
         {/* Header */}
         <div style={{
-          padding: '24px 24px 20px',
+          padding: isMobile ? '16px 20px 16px' : '24px 24px 20px',
           borderBottom: '1px solid rgba(255,255,255,0.06)',
           display: 'flex',
           alignItems: 'flex-start',

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useShareToken, useGenerateShareToken, useRevokeShareToken } from '../api/share'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export default function ShareButton() {
+  const isMobile = useIsMobile()
   const { data: shareData } = useShareToken()
   const generateShare = useGenerateShareToken()
   const revokeShare = useRevokeShareToken()
@@ -61,9 +63,10 @@ export default function ShareButton() {
           />
           <div style={{
             position: 'absolute',
-            top: 'calc(100% + 8px)',
+            top: isMobile ? undefined : 'calc(100% + 8px)',
+            bottom: isMobile ? 'calc(100% + 8px)' : undefined,
             right: 0,
-            width: '300px',
+            width: isMobile ? 'calc(100vw - 32px)' : '300px',
             background: '#0d0f1e',
             border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: '12px',

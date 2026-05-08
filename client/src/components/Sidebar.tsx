@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const PRESET_COLORS = [
   '#4A90D9', '#7C3AED', '#10B981', '#F59E0B',
@@ -21,9 +22,12 @@ interface Props {
   categories: Category[]
   nodes: GraphNode[]
   onSelectNode: (id: string) => void
+  mobileOpen?: boolean
+  onMobileClose?: () => void
 }
 
-export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
+export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, onMobileClose }: Props) {
+  const isMobile = useIsMobile()
   const { hiddenCategories, toggleCategory } = useGraphStore()
   const { data: intData } = useIntegrations()
   const connectGoogle = useConnectGoogle()
@@ -84,15 +88,34 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
         />
       )}
 
+      {/* Mobile backdrop */}
+      {isMobile && mobileOpen && (
+        <div
+          onClick={onMobileClose}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 55,
+            background: 'rgba(0,0,0,0.5)',
+            backdropFilter: 'blur(2px)',
+          }}
+        />
+      )}
+
       <div style={{
         width: '280px',
         minHeight: '100vh',
-        background: 'rgba(8,8,18,0.95)',
+        background: 'rgba(8,8,18,0.97)',
         borderRight: '1px solid rgba(255,255,255,0.07)',
         display: 'flex',
         flexDirection: 'column',
         padding: '28px 24px',
-        position: 'relative',
+        position: isMobile ? 'fixed' : 'relative',
+        top: isMobile ? 0 : undefined,
+        left: isMobile ? 0 : undefined,
+        bottom: isMobile ? 0 : undefined,
+        zIndex: isMobile ? 60 : undefined,
+        transform: isMobile ? `translateX(${mobileOpen ? '0' : '-100%'})` : undefined,
+        transition: isMobile ? 'transform 0.25s ease' : undefined,
+        overflowY: isMobile ? 'auto' : undefined,
       }}>
         {/* Header */}
         <div style={{ marginBottom: '32px' }}>
@@ -101,6 +124,16 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
               U&amp;I
             </h1>
             <div style={{ display: 'flex', gap: '4px' }}>
+              {isMobile && (
+                <button
+                  onClick={onMobileClose}
+                  style={{ ...iconBtnStyle, fontSize: '18px' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                >
+                  ✕
+                </button>
+              )}
               <button
                 onClick={() => setShowNotificationSettings(true)}
                 title="Notification settings"

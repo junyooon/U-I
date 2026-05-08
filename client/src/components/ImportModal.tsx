@@ -65,7 +65,7 @@ export default function ImportModal({ onClose }: Props) {
     >
       <div
         style={{
-          width: '520px', maxHeight: '80vh',
+          width: '520px', maxWidth: 'calc(100vw - 32px)', maxHeight: '80vh',
           background: '#0d0f1e',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: '14px',
