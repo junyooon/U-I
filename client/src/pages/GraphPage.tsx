@@ -48,7 +48,7 @@ export default function GraphPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar categories={data.categories} nodes={data.nodes} userName={data.center.name} />
+      <Sidebar categories={data.categories} nodes={data.nodes} />
       <Scene data={data} />
       {banner && (
         <div style={{
