@@ -1,11 +1,22 @@
 import { useEffect, useState } from 'react'
-import { useContact, useCreateInteraction, useDeleteInteraction, useDeleteContact } from '../api/contacts'
+import { useContact, useCreateInteraction, useDeleteInteraction, useDeleteContact, usePatchContact } from '../api/contacts'
 import type { Category } from '../types'
 
 interface Props {
   contactId: string
   categories: Category[]
   onClose: () => void
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block', fontSize: '12px', color: '#6b7280',
+  marginBottom: '6px', fontWeight: 500,
+}
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '9px 12px', borderRadius: '8px',
+  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(255,255,255,0.05)', color: '#fff',
+  fontSize: '13px', outline: 'none', boxSizing: 'border-box',
 }
 
 function relativeTime(dateStr: string): string {
@@ -31,8 +42,14 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
   const createInteraction = useCreateInteraction(contactId)
   const deleteInteraction = useDeleteInteraction(contactId)
   const deleteContact = useDeleteContact()
+  const patchContact = usePatchContact(contactId)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [confirmDeleteContact, setConfirmDeleteContact] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+  const [editPhone, setEditPhone] = useState('')
+  const [editCategoryIds, setEditCategoryIds] = useState<string[]>([])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -65,6 +82,29 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
       type: 'in_person',
       occurred_at: new Date().toISOString(),
     })
+  }
+
+  function openEdit() {
+    if (!contact) return
+    setEditName(contact.name)
+    setEditEmail(contact.email ?? '')
+    setEditPhone(contact.phone ?? '')
+    setEditCategoryIds(contact.category_ids)
+    setEditing(true)
+  }
+
+  function toggleEditCategory(id: string) {
+    setEditCategoryIds(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id])
+  }
+
+  async function handleSave() {
+    await patchContact.mutateAsync({
+      name: editName.trim(),
+      email: editEmail.trim() || null,
+      phone: editPhone.trim() || null,
+      category_ids: editCategoryIds,
+    })
+    setEditing(false)
   }
 
   return (
@@ -127,7 +167,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
             >
               ✕
             </button>
-            {contact && (
+            {contact && !editing && (
               confirmDeleteContact ? (
                 <div style={{ display: 'flex', gap: '6px' }}>
                   <button
@@ -151,19 +191,34 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={() => setConfirmDeleteContact(true)}
-                  title="Remove from world"
-                  style={{
-                    background: 'none', border: 'none', cursor: 'pointer',
-                    color: '#4b5563', fontSize: '14px', lineHeight: 1, padding: '2px',
-                    transition: 'color 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
-                >
-                  🗑
-                </button>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    onClick={openEdit}
+                    title="Edit contact"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#4b5563', fontSize: '14px', lineHeight: 1, padding: '2px',
+                      transition: 'color 0.15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteContact(true)}
+                    title="Remove from world"
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: '#4b5563', fontSize: '14px', lineHeight: 1, padding: '2px',
+                      transition: 'color 0.15s',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
+                    onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                  >
+                    🗑
+                  </button>
+                </div>
               )
             )}
           </div>
@@ -171,7 +226,95 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
 
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-          {contact && (
+          {contact && editing ? (
+            /* ── Edit form ── */
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              <div>
+                <label style={labelStyle}>Name *</label>
+                <input
+                  autoFocus
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Email</label>
+                <input
+                  type="email"
+                  value={editEmail}
+                  onChange={e => setEditEmail(e.target.value)}
+                  placeholder="—"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label style={labelStyle}>Phone</label>
+                <input
+                  type="tel"
+                  value={editPhone}
+                  onChange={e => setEditPhone(e.target.value)}
+                  placeholder="—"
+                  style={inputStyle}
+                />
+              </div>
+              {categories.length > 0 && (
+                <div>
+                  <label style={labelStyle}>Categories</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {categories.map(cat => {
+                      const active = editCategoryIds.includes(cat.id)
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => toggleEditCategory(cat.id)}
+                          style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '5px',
+                            padding: '4px 10px', borderRadius: '20px',
+                            border: `1px solid ${active ? cat.color : 'rgba(255,255,255,0.1)'}`,
+                            background: active ? `${cat.color}22` : 'transparent',
+                            color: active ? '#fff' : '#6b7280',
+                            fontSize: '12px', cursor: 'pointer', transition: 'all 0.15s',
+                          }}
+                        >
+                          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cat.color }} />
+                          {cat.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+              {patchContact.error && (
+                <p style={{ color: '#f87171', fontSize: '12px' }}>{(patchContact.error as Error).message}</p>
+              )}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+                <button
+                  onClick={handleSave}
+                  disabled={patchContact.isPending || !editName.trim()}
+                  style={{
+                    flex: 1, padding: '9px 0', borderRadius: '8px',
+                    border: 'none', background: '#3b82f6',
+                    color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >
+                  {patchContact.isPending ? 'Saving…' : 'Save'}
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  style={{
+                    flex: 1, padding: '9px 0', borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'transparent', color: '#6b7280',
+                    fontSize: '13px', cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : contact && (
             <>
               {/* Contact info */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>

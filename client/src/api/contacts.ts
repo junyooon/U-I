@@ -83,6 +83,22 @@ export function useDeleteInteraction(contactId: string) {
   })
 }
 
+export function usePatchContact(contactId: string) {
+  const token = useAuthStore((s) => s.token)
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { name?: string; email?: string | null; phone?: string | null; category_ids?: string[] }) =>
+      apiFetch(`/contacts/${contactId}`, token!, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['contact', contactId] })
+      queryClient.invalidateQueries({ queryKey: ['graph'] })
+    },
+  })
+}
+
 export function useDeleteContact() {
   const token = useAuthStore((s) => s.token)
   const queryClient = useQueryClient()
