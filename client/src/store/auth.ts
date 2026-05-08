@@ -11,6 +11,7 @@ interface AuthStore {
   token: string | null
   user: User | null
   setAuth: (token: string, user: User) => void
+  setToken: (token: string) => void
   clearAuth: () => void
 }
 
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       user: null,
       setAuth: (token, user) => set({ token, user }),
+      setToken: (token) => set({ token }),
       clearAuth: () => set({ token: null, user: null }),
     }),
     { name: 'uni-auth' }

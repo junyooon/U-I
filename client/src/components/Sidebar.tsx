@@ -1,4 +1,5 @@
 import { useGraphStore } from '../store/graph'
+import { useIntegrations, useConnectGoogle, useSyncNow } from '../api/integrations'
 import type { Category, GraphNode } from '../types'
 
 interface Props {
@@ -9,6 +10,13 @@ interface Props {
 
 export default function Sidebar({ categories, nodes, userName }: Props) {
   const { hiddenCategories, toggleCategory } = useGraphStore()
+  const { data: intData } = useIntegrations()
+  const connectGoogle = useConnectGoogle()
+  const syncNow = useSyncNow()
+
+  const googleConnected = intData?.integrations.some(
+    i => i.provider === 'google_email' && i.status === 'connected'
+  )
 
   // Find most drifted contact for the notification
   const mostDrifted = nodes.reduce<GraphNode | null>(
@@ -112,6 +120,55 @@ export default function Sidebar({ categories, nodes, userName }: Props) {
         }}>
           <span>+</span> New category
         </button>
+      </div>
+
+      {/* Integrations */}
+      <div style={{ marginTop: 'auto', paddingTop: '24px', paddingBottom: mostDrifted && mostDrifted.drift_velocity > 0.3 ? '80px' : '0' }}>
+        <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: '#4b5563', marginBottom: '10px' }}>
+          INTEGRATIONS
+        </p>
+        {googleConnected ? (
+          <button
+            onClick={() => syncNow.mutate()}
+            disabled={syncNow.isPending}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid rgba(74,222,128,0.25)',
+              background: 'rgba(74,222,128,0.06)',
+              color: '#4ade80',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            <span>●</span>
+            {syncNow.isPending ? 'Syncing…' : 'Google connected · Sync now'}
+          </button>
+        ) : (
+          <button
+            onClick={() => connectGoogle.mutate()}
+            disabled={connectGoogle.isPending}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 14px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.04)',
+              color: '#9ca3af',
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            <span>⊕</span> Connect Google
+          </button>
+        )}
       </div>
 
       {/* Bottom notification */}
