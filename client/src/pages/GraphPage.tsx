@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import Scene from '../components/graph/Scene'
 import Sidebar from '../components/Sidebar'
 import ContactPanel from '../components/ContactPanel'
+import ShareButton from '../components/ShareButton'
 import { useGraph } from '../api/hooks'
 
 export default function GraphPage() {
@@ -59,6 +60,9 @@ export default function GraphPage() {
       <Sidebar categories={data.categories} nodes={data.nodes} onSelectNode={selectNode} />
       <div style={{ flex: 1, position: 'relative' }}>
         <Scene data={data} onSelectNode={selectNode} focusedNodeId={focusedNodeId} />
+        <div style={{ position: 'absolute', top: '24px', right: '24px', zIndex: 10 }}>
+          <ShareButton />
+        </div>
       </div>
       {selectedNodeId && (
         <ContactPanel

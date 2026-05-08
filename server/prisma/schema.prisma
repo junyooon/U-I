@@ -15,6 +15,7 @@ model User {
   emailVerified Boolean   @default(false) @map("email_verified")
   oauthProvider String?   @map("oauth_provider") @db.VarChar(50)
   oauthId       String?   @map("oauth_id") @db.VarChar(255)
+  shareToken    String?   @unique @map("share_token") @db.VarChar(64)
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
 
