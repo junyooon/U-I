@@ -21,3 +21,15 @@ export function useCreateCategory() {
     },
   })
 }
+
+export function useDeleteCategory() {
+  const token = useAuthStore((s) => s.token)
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (categoryId: string) =>
+      apiFetch(`/categories/${categoryId}`, token!, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['graph'] })
+    },
+  })
+}

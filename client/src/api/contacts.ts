@@ -82,3 +82,15 @@ export function useDeleteInteraction(contactId: string) {
     },
   })
 }
+
+export function useDeleteContact() {
+  const token = useAuthStore((s) => s.token)
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (contactId: string) =>
+      apiFetch(`/contacts/${contactId}`, token!, { method: 'DELETE' }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['graph'] })
+    },
+  })
+}

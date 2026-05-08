@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useContact, useCreateInteraction, useDeleteInteraction } from '../api/contacts'
+import { useContact, useCreateInteraction, useDeleteInteraction, useDeleteContact } from '../api/contacts'
 import type { Category } from '../types'
 
 interface Props {
@@ -30,7 +30,9 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
   const { data, isLoading } = useContact(contactId)
   const createInteraction = useCreateInteraction(contactId)
   const deleteInteraction = useDeleteInteraction(contactId)
+  const deleteContact = useDeleteContact()
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [confirmDeleteContact, setConfirmDeleteContact] = useState(false)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -115,16 +117,56 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
               </>
             )}
           </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: '#4b5563', fontSize: '18px', lineHeight: 1, padding: '2px',
-              flexShrink: 0,
-            }}
-          >
-            ✕
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '10px', flexShrink: 0 }}>
+            <button
+              onClick={onClose}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: '#4b5563', fontSize: '18px', lineHeight: 1, padding: '2px',
+              }}
+            >
+              ✕
+            </button>
+            {contact && (
+              confirmDeleteContact ? (
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    onClick={() => deleteContact.mutate(contactId, { onSuccess: onClose })}
+                    disabled={deleteContact.isPending}
+                    style={{
+                      fontSize: '11px', color: '#f87171',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    }}
+                  >
+                    {deleteContact.isPending ? 'Removing…' : 'Remove'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDeleteContact(false)}
+                    style={{
+                      fontSize: '11px', color: '#4b5563',
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDeleteContact(true)}
+                  title="Remove from world"
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#4b5563', fontSize: '14px', lineHeight: 1, padding: '2px',
+                    transition: 'color 0.15s',
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                >
+                  🗑
+                </button>
+              )
+            )}
+          </div>
         </div>
 
         {/* Body */}

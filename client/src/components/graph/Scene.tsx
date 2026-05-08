@@ -15,7 +15,8 @@ export default function Scene({ data, onSelectNode }: Props) {
 
   return (
     <div style={{
-      flex: 1,
+      width: '100%',
+      height: '100%',
       background: 'radial-gradient(ellipse at 50% 40%, #1a2040 0%, #0a0f1e 40%, #050810 70%, #010208 100%)',
     }}>
       <Canvas

@@ -3,6 +3,7 @@ import { useGraphStore } from '../store/graph'
 import { useIntegrations, useConnectGoogle, useSyncNow } from '../api/integrations'
 import { useAuthStore } from '../store/auth'
 import { apiFetch } from '../api/client'
+import { useDeleteCategory } from '../api/categories'
 import AddPersonModal from './AddPersonModal'
 import AddCategoryModal from './AddCategoryModal'
 import type { Category, GraphNode } from '../types'
@@ -21,6 +22,9 @@ export default function Sidebar({ categories, nodes }: Props) {
 
   const [showAddPerson, setShowAddPerson] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
+  const [hoveredCatId, setHoveredCatId] = useState<string | null>(null)
+  const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<string | null>(null)
+  const deleteCategory = useDeleteCategory()
 
   const googleConnected = intData?.integrations.some(
     i => i.provider === 'google_email' && i.status === 'connected'
@@ -115,39 +119,77 @@ export default function Sidebar({ categories, nodes }: Props) {
           {categories.length === 0 ? (
             <p style={{ fontSize: '13px', color: '#4b5563', fontStyle: 'italic' }}>No categories yet</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {categories.map(cat => {
                 const hidden = hiddenCategories.has(cat.id)
+                const isConfirming = confirmDeleteCatId === cat.id
                 return (
-                  <button
+                  <div
                     key={cat.id}
-                    onClick={() => toggleCategory(cat.id)}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: '4px 0',
-                      color: hidden ? '#4b5563' : '#e5e7eb',
-                      fontSize: '14px',
-                      textAlign: 'left',
-                      transition: 'color 0.15s',
-                    }}
+                    onMouseEnter={() => setHoveredCatId(cat.id)}
+                    onMouseLeave={() => { setHoveredCatId(null); setConfirmDeleteCatId(null) }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '4px 0' }}
                   >
-                    <span style={{ width: '14px', color: hidden ? 'transparent' : '#6b7280', fontSize: '12px' }}>✓</span>
-                    <span style={{
-                      width: '10px',
-                      height: '10px',
-                      borderRadius: '50%',
-                      background: cat.color,
-                      flexShrink: 0,
-                      opacity: hidden ? 0.3 : 1,
-                      boxShadow: hidden ? 'none' : `0 0 6px ${cat.color}`,
-                    }} />
-                    {cat.name}
-                  </button>
+                    <button
+                      onClick={() => toggleCategory(cat.id)}
+                      style={{
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        color: hidden ? '#4b5563' : '#e5e7eb',
+                        fontSize: '14px',
+                        textAlign: 'left',
+                        transition: 'color 0.15s',
+                        minWidth: 0,
+                      }}
+                    >
+                      <span style={{ width: '14px', color: hidden ? 'transparent' : '#6b7280', fontSize: '12px', flexShrink: 0 }}>✓</span>
+                      <span style={{
+                        width: '10px', height: '10px', borderRadius: '50%',
+                        background: cat.color, flexShrink: 0,
+                        opacity: hidden ? 0.3 : 1,
+                        boxShadow: hidden ? 'none' : `0 0 6px ${cat.color}`,
+                      }} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.name}</span>
+                    </button>
+                    {hoveredCatId === cat.id && (
+                      isConfirming ? (
+                        <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                          <button
+                            onClick={() => {
+                              deleteCategory.mutate(cat.id)
+                              setConfirmDeleteCatId(null)
+                            }}
+                            style={{ fontSize: '11px', color: '#f87171', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                          >
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setConfirmDeleteCatId(null)}
+                            style={{ fontSize: '11px', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDeleteCatId(cat.id)}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            color: '#4b5563', fontSize: '13px', padding: '0 2px',
+                            lineHeight: 1, flexShrink: 0,
+                          }}
+                        >
+                          🗑
+                        </button>
+                      )
+                    )}
+                  </div>
                 )
               })}
             </div>
