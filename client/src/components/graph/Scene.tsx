@@ -7,9 +7,10 @@ import type { GraphData } from '../../types'
 
 interface Props {
   data: GraphData
+  onSelectNode: (id: string) => void
 }
 
-export default function Scene({ data }: Props) {
+export default function Scene({ data, onSelectNode }: Props) {
   const hiddenCategories = useGraphStore((s) => s.hiddenCategories)
 
   return (
@@ -34,6 +35,7 @@ export default function Scene({ data }: Props) {
               index={i}
               total={data.nodes.length}
               visible={visible}
+              onSelect={onSelectNode}
             />
           )
         })}

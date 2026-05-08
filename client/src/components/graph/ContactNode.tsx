@@ -9,6 +9,7 @@ interface Props {
   index: number
   total: number
   visible: boolean
+  onSelect: (id: string) => void
 }
 
 const DRIFT_SPEED = 0.0003 // radians/second at drift_velocity = 1.0
@@ -32,7 +33,7 @@ function fibonacciPoint(index: number, total: number, radius: number): THREE.Vec
   )
 }
 
-export default function ContactNode({ node, index, total, visible }: Props) {
+export default function ContactNode({ node, index, total, visible, onSelect }: Props) {
   const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
 
@@ -72,6 +73,7 @@ export default function ContactNode({ node, index, total, visible }: Props) {
       <mesh
         onPointerOver={(e) => { e.stopPropagation(); setHovered(true) }}
         onPointerOut={() => setHovered(false)}
+        onClick={(e) => { e.stopPropagation(); onSelect(node.id) }}
       >
         <sphereGeometry args={[2, 24, 24]} />
         <meshStandardMaterial

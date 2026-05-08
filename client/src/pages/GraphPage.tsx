@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import Scene from '../components/graph/Scene'
 import Sidebar from '../components/Sidebar'
+import ContactPanel from '../components/ContactPanel'
 import { useGraph } from '../api/hooks'
 
 export default function GraphPage() {
   const { data, isLoading, error } = useGraph()
   const queryClient = useQueryClient()
   const [banner, setBanner] = useState<'connected' | 'error' | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -49,7 +51,14 @@ export default function GraphPage() {
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar categories={data.categories} nodes={data.nodes} />
-      <Scene data={data} />
+      <Scene data={data} onSelectNode={setSelectedNodeId} />
+      {selectedNodeId && (
+        <ContactPanel
+          contactId={selectedNodeId}
+          categories={data.categories}
+          onClose={() => setSelectedNodeId(null)}
+        />
+      )}
       {banner && (
         <div style={{
           position: 'fixed', bottom: '24px', right: '24px',
