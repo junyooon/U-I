@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String    @db.VarChar(100)
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String?   @map("password_hash") @db.VarChar(255)
+  emailVerified Boolean   @default(false) @map("email_verified")
+  oauthProvider String?   @map("oauth_provider") @db.VarChar(50)
+  oauthId       String?   @map("oauth_id") @db.VarChar(255)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  categories           Category[]
+  contacts             Contact[]
+  interactions         Interaction[]
+  integrations         Integration[]
+  notificationSettings NotificationSettings?
+  refreshTokens        RefreshToken[]
+
+  @@map("users")
+}
+
+model Category {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String   @db.VarChar(50)
+  color     String   @db.Char(7)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactCategories ContactCategory[]
+
+  @@index([userId])
+  @@map("categories")
+}
+
+model Contact {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId        String    @map("user_id") @db.Uuid
+  name          String    @db.VarChar(100)
+  phone         String?   @db.VarChar(30)
+  email         String?   @db.VarChar(255)
+  lastContactAt DateTime? @map("last_contact_at") @db.Timestamptz
+  driftScore    Float     @default(0) @map("drift_score")
+  distance      Float     @default(0)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactCategories ContactCategory[]
+  interactions      Interaction[]
+
+  @@index([userId])
+  @@index([userId, lastContactAt])
+  @@map("contacts")
+}
+
+model ContactCategory {
+  contactId  String @map("contact_id") @db.Uuid
+  categoryId String @map("category_id") @db.Uuid
+
+  contact  Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@id([contactId, categoryId])
+  @@map("contact_categories")
+}
+
+model Interaction {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contactId   String   @map("contact_id") @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  type        String   @db.VarChar(20)
+  occurredAt  DateTime @map("occurred_at") @db.Timestamptz
+  source      String   @default("manual") @db.VarChar(20)
+  notes       String?  @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  contact Contact @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([contactId, occurredAt(sort: Desc)])
+  @@index([userId])
+  @@map("interactions")
+}
+
+model Integration {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  provider        String    @db.VarChar(50)
+  status          String    @default("disconnected") @db.VarChar(20)
+  accessTokenEnc  String?   @map("access_token_enc")
+  refreshTokenEnc String?   @map("refresh_token_enc")
+  tokenExpiresAt  DateTime? @map("token_expires_at") @db.Timestamptz
+  lastSyncedAt    DateTime? @map("last_synced_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@map("integrations")
+}
+
+model NotificationSettings {
+  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String  @unique @map("user_id") @db.Uuid
+  warnDays           Int     @default(30) @map("warn_days")
+  alertDays          Int     @default(60) @map("alert_days")
+  criticalDays       Int     @default(90) @map("critical_days")
+  channelInApp       Boolean @default(true) @map("channel_in_app")
+  channelPush        Boolean @default(false) @map("channel_push")
+  channelEmailDigest Boolean @default(true) @map("channel_email_digest")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_settings")
+}
+
+model RefreshToken {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamptz
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
