@@ -12,6 +12,7 @@ import { apiFetch } from '../api/client'
 import { useDeleteCategory, usePatchCategory } from '../api/categories'
 import AddPersonModal from './AddPersonModal'
 import AddCategoryModal from './AddCategoryModal'
+import NotificationSettingsModal from './NotificationSettingsModal'
 import type { Category, GraphNode } from '../types'
 
 interface Props {
@@ -28,6 +29,7 @@ export default function Sidebar({ categories, nodes }: Props) {
 
   const [showAddPerson, setShowAddPerson] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false)
   const [hoveredCatId, setHoveredCatId] = useState<string | null>(null)
   const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<string | null>(null)
   const [editingCatId, setEditingCatId] = useState<string | null>(null)
@@ -63,6 +65,9 @@ export default function Sidebar({ categories, nodes }: Props) {
       {showAddCategory && (
         <AddCategoryModal onClose={() => setShowAddCategory(false)} />
       )}
+      {showNotificationSettings && (
+        <NotificationSettingsModal onClose={() => setShowNotificationSettings(false)} />
+      )}
 
       <div style={{
         width: '280px',
@@ -80,24 +85,26 @@ export default function Sidebar({ categories, nodes }: Props) {
             <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', color: '#fff' }}>
               U&amp;I
             </h1>
-            <button
-              onClick={handleLogout}
-              title="Log out"
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#4b5563',
-                fontSize: '13px',
-                padding: '4px',
-                lineHeight: 1,
-                transition: 'color 0.15s',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
-            >
-              ⎋
-            </button>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button
+                onClick={() => setShowNotificationSettings(true)}
+                title="Notification settings"
+                style={iconBtnStyle}
+                onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+              >
+                ⚙
+              </button>
+              <button
+                onClick={handleLogout}
+                title="Log out"
+                style={iconBtnStyle}
+                onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+              >
+                ⎋
+              </button>
+            </div>
           </div>
           <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
             Your world of connections
@@ -377,6 +384,17 @@ export default function Sidebar({ categories, nodes }: Props) {
       </div>
     </>
   )
+}
+
+const iconBtnStyle: React.CSSProperties = {
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  color: '#4b5563',
+  fontSize: '15px',
+  padding: '4px',
+  lineHeight: 1,
+  transition: 'color 0.15s',
 }
 
 const actionBtnStyle: React.CSSProperties = {
