@@ -13,6 +13,7 @@ import { useDeleteCategory, usePatchCategory } from '../api/categories'
 import AddPersonModal from './AddPersonModal'
 import AddCategoryModal from './AddCategoryModal'
 import NotificationSettingsModal from './NotificationSettingsModal'
+import TimelinePanel from './TimelinePanel'
 import type { Category, GraphNode } from '../types'
 
 interface Props {
@@ -32,6 +33,7 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
   const [showAddPerson, setShowAddPerson] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [showNotificationSettings, setShowNotificationSettings] = useState(false)
+  const [showTimeline, setShowTimeline] = useState(false)
   const [hoveredCatId, setHoveredCatId] = useState<string | null>(null)
   const [confirmDeleteCatId, setConfirmDeleteCatId] = useState<string | null>(null)
   const [editingCatId, setEditingCatId] = useState<string | null>(null)
@@ -69,6 +71,12 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
       )}
       {showNotificationSettings && (
         <NotificationSettingsModal onClose={() => setShowNotificationSettings(false)} />
+      )}
+      {showTimeline && (
+        <TimelinePanel
+          onClose={() => setShowTimeline(false)}
+          onSelectContact={(id) => { onSelectNode(id); setShowTimeline(false) }}
+        />
       )}
 
       <div style={{
@@ -350,17 +358,14 @@ export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
 
         {/* Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <button
-            onClick={() => setShowAddPerson(true)}
-            style={actionBtnStyle}
-          >
+          <button onClick={() => setShowAddPerson(true)} style={actionBtnStyle}>
             <span>👤</span> Add a person
           </button>
-          <button
-            onClick={() => setShowAddCategory(true)}
-            style={actionBtnStyle}
-          >
+          <button onClick={() => setShowAddCategory(true)} style={actionBtnStyle}>
             <span>+</span> New category
+          </button>
+          <button onClick={() => setShowTimeline(true)} style={actionBtnStyle}>
+            <span>◷</span> Timeline
           </button>
         </div>
 
