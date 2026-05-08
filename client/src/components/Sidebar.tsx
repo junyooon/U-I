@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useIsMobile } from '../hooks/useIsMobile'
+import { useThemeStore } from '../store/theme'
 
 const PRESET_COLORS = [
   '#4A90D9', '#7C3AED', '#10B981', '#F59E0B',
@@ -28,6 +29,7 @@ interface Props {
 
 export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, onMobileClose }: Props) {
   const isMobile = useIsMobile()
+  const { theme, toggle: toggleTheme } = useThemeStore()
   const { hiddenCategories, toggleCategory } = useGraphStore()
   const { data: intData } = useIntegrations()
   const connectGoogle = useConnectGoogle()
@@ -103,8 +105,8 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
       <div style={{
         width: '280px',
         minHeight: '100vh',
-        background: 'rgba(8,8,18,0.97)',
-        borderRight: '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--bg-sidebar)',
+        borderRight: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
         padding: '28px 24px',
@@ -120,7 +122,7 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
         {/* Header */}
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', color: '#fff' }}>
+            <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
               U&amp;I
             </h1>
             <div style={{ display: 'flex', gap: '4px' }}>
@@ -128,18 +130,27 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
                 <button
                   onClick={onMobileClose}
                   style={{ ...iconBtnStyle, fontSize: '18px' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
-                  onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
                 >
                   ✕
                 </button>
               )}
               <button
+                onClick={toggleTheme}
+                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                style={iconBtnStyle}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
+              >
+                {theme === 'dark' ? '☀' : '🌙'}
+              </button>
+              <button
                 onClick={() => setShowNotificationSettings(true)}
                 title="Notification settings"
                 style={iconBtnStyle}
-                onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
               >
                 ⚙
               </button>
@@ -147,22 +158,22 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
                 onClick={handleLogout}
                 title="Log out"
                 style={iconBtnStyle}
-                onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
-                onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
               >
                 ⎋
               </button>
             </div>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
-            <p style={{ fontSize: '12px', color: '#6b7280' }}>
+            <p style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
               Your world of connections
             </p>
             <button
               onClick={() => setShowImport(true)}
-              style={{ fontSize: '11px', color: '#4b5563', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.15s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#9ca3af')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
+              style={{ fontSize: '11px', color: 'var(--text-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, transition: 'color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--text-muted)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-faint)')}
             >
               Import CSV
             </button>
@@ -181,9 +192,9 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
               width: '100%',
               padding: '8px 12px',
               borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.05)',
-              color: '#fff',
+              border: '1px solid var(--border-md)',
+              background: 'var(--bg-input)',
+              color: 'var(--text-primary)',
               fontSize: '13px',
               outline: 'none',
               boxSizing: 'border-box',
@@ -195,8 +206,8 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
               top: 'calc(100% + 4px)',
               left: 0,
               right: 0,
-              background: '#0d0f1e',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'var(--bg-surface)',
+              border: '1px solid var(--border-md)',
               borderRadius: '8px',
               overflow: 'hidden',
               zIndex: 10,
@@ -204,7 +215,7 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
               overflowY: 'auto',
             }}>
               {nodes.filter(n => n.name.toLowerCase().includes(query.toLowerCase())).length === 0 ? (
-                <p style={{ padding: '12px', fontSize: '13px', color: '#4b5563', fontStyle: 'italic' }}>No results</p>
+                <p style={{ padding: '12px', fontSize: '13px', color: 'var(--text-faint)', fontStyle: 'italic' }}>No results</p>
               ) : (
                 nodes
                   .filter(n => n.name.toLowerCase().includes(query.toLowerCase()))
@@ -220,10 +231,10 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
                         padding: '10px 12px',
                         background: 'none',
                         border: 'none',
-                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        borderBottom: '1px solid var(--border-faint)',
                         cursor: 'pointer',
                         textAlign: 'left',
-                        color: '#e5e7eb',
+                        color: 'var(--text-secondary)',
                         fontSize: '13px',
                       }}
                       onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
@@ -250,22 +261,22 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
           marginBottom: '24px',
           padding: '10px 14px',
           borderRadius: '8px',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
         }}>
-          <span style={{ fontSize: '18px', fontWeight: 700, color: '#fff' }}>{nodes.length}</span>
-          <span style={{ fontSize: '12px', color: '#6b7280' }}>
+          <span style={{ fontSize: '18px', fontWeight: 700, color: 'var(--text-primary)' }}>{nodes.length}</span>
+          <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>
             {nodes.length === 1 ? 'person' : 'people'} in your world
           </span>
         </div>
 
         {/* Categories */}
         <div style={{ marginBottom: '24px' }}>
-          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: '#4b5563', marginBottom: '12px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: 'var(--text-faint)', marginBottom: '12px' }}>
             CATEGORIES
           </p>
           {categories.length === 0 ? (
-            <p style={{ fontSize: '13px', color: '#4b5563', fontStyle: 'italic' }}>No categories yet</p>
+            <p style={{ fontSize: '13px', color: 'var(--text-faint)', fontStyle: 'italic' }}>No categories yet</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               {categories.map(cat => {
@@ -282,8 +293,8 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
                         onChange={e => setEditCatName(e.target.value)}
                         style={{
                           width: '100%', padding: '7px 10px', borderRadius: '6px',
-                          border: '1px solid rgba(255,255,255,0.15)',
-                          background: 'rgba(255,255,255,0.06)', color: '#fff',
+                          border: '1px solid var(--border-md)',
+                          background: 'var(--bg-input)', color: 'var(--text-primary)',
                           fontSize: '13px', outline: 'none', boxSizing: 'border-box',
                         }}
                       />
@@ -419,7 +430,7 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
 
         {/* Integrations */}
         <div style={{ marginTop: 'auto', paddingTop: '24px', paddingBottom: mostDrifted && mostDrifted.drift_velocity > 0.3 ? '80px' : '0' }}>
-          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: '#4b5563', marginBottom: '10px' }}>
+          <p style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '1.5px', color: 'var(--text-faint)', marginBottom: '10px' }}>
             INTEGRATIONS
           </p>
           {googleConnected ? (
@@ -454,9 +465,9 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
                 gap: '8px',
                 padding: '9px 14px',
                 borderRadius: '8px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                background: 'rgba(255,255,255,0.04)',
-                color: '#9ca3af',
+                border: '1px solid var(--border-md)',
+                background: 'var(--bg-card)',
+                color: 'var(--text-muted)',
                 fontSize: '12px',
                 cursor: 'pointer',
               }}
@@ -474,8 +485,8 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
             left: 0,
             right: 0,
             padding: '16px 20px',
-            borderTop: '1px solid rgba(255,255,255,0.07)',
-            background: 'rgba(8,8,18,0.98)',
+            borderTop: '1px solid var(--border)',
+            background: 'var(--bg-sidebar)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -483,9 +494,9 @@ export default function Sidebar({ categories, nodes, onSelectNode, mobileOpen, o
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '16px' }}>💬</span>
-              <p style={{ fontSize: '12px', color: '#9ca3af', lineHeight: '1.4' }}>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.4' }}>
                 It's been a while since you've connected with{' '}
-                <strong style={{ color: '#e5e7eb' }}>{mostDrifted.name}</strong>.
+                <strong style={{ color: 'var(--text-secondary)' }}>{mostDrifted.name}</strong>.
               </p>
             </div>
             <button
@@ -518,7 +529,7 @@ const iconBtnStyle: React.CSSProperties = {
   background: 'none',
   border: 'none',
   cursor: 'pointer',
-  color: '#4b5563',
+  color: 'var(--text-faint)',
   fontSize: '15px',
   padding: '4px',
   lineHeight: 1,
@@ -531,9 +542,9 @@ const actionBtnStyle: React.CSSProperties = {
   gap: '8px',
   padding: '10px 14px',
   borderRadius: '8px',
-  border: '1px solid rgba(255,255,255,0.1)',
-  background: 'rgba(255,255,255,0.04)',
-  color: '#9ca3af',
+  border: '1px solid var(--border-md)',
+  background: 'var(--bg-card)',
+  color: 'var(--text-muted)',
   fontSize: '13px',
   cursor: 'pointer',
   textAlign: 'left',

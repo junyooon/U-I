@@ -42,9 +42,9 @@ export default function GraphPage() {
   if (isLoading) {
     return (
       <div style={{
-        minHeight: '100vh', background: '#010208',
+        minHeight: '100vh', background: 'var(--bg-page)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: '#4b5563', fontSize: '14px',
+        color: 'var(--text-faint)', fontSize: '14px',
       }}>
         Loading your world…
       </div>

@@ -4,6 +4,9 @@ import LoginPage from './pages/LoginPage'
 import GraphPage from './pages/GraphPage'
 import SharePage from './pages/SharePage'
 import { useAuthStore } from './store/auth'
+import { applyTheme } from './store/theme'
+
+applyTheme()
 
 const queryClient = new QueryClient()
 

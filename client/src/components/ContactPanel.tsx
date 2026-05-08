@@ -126,8 +126,8 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
         left: 0, right: 0, bottom: 0,
         height: '85vh',
         zIndex: 45,
-        background: 'rgba(10,10,22,0.98)',
-        borderTop: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--bg-sidebar)',
+        borderTop: '1px solid var(--border)',
         borderRadius: '16px 16px 0 0',
         display: 'flex',
         flexDirection: 'column',
@@ -137,8 +137,8 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
         top: 0, right: 0, bottom: 0,
         width: '340px',
         zIndex: 45,
-        background: 'rgba(10,10,22,0.97)',
-        borderLeft: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--bg-sidebar)',
+        borderLeft: '1px solid var(--border)',
         display: 'flex',
         flexDirection: 'column',
         backdropFilter: 'blur(16px)',
@@ -153,7 +153,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
         {/* Header */}
         <div style={{
           padding: isMobile ? '16px 20px 16px' : '24px 24px 20px',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'flex-start',
           justifyContent: 'space-between',
@@ -164,7 +164,7 @@ export default function ContactPanel({ contactId, categories, onClose }: Props) 
               <div style={{ color: '#4b5563', fontSize: '14px' }}>Loading…</div>
             ) : (
               <>
-                <h2 style={{ color: '#fff', fontSize: '18px', fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
+                <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 700, margin: 0, lineHeight: 1.2 }}>
                   {contact?.name}
                 </h2>
                 {contact?.last_contact_at && (

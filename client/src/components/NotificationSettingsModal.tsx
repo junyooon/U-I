@@ -59,8 +59,8 @@ export default function NotificationSettingsModal({ onClose }: Props) {
       <div
         style={{
           width: '400px', maxWidth: 'calc(100vw - 32px)',
-          background: '#0d0f1e',
-          border: '1px solid rgba(255,255,255,0.1)',
+          background: 'var(--bg-surface)',
+          border: '1px solid var(--border-md)',
           borderRadius: '14px',
           padding: '28px',
         }}

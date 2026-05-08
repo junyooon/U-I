@@ -116,8 +116,8 @@ export default function OnboardingModal({ onComplete, existingCategories }: Prop
     }}>
       <div style={{
         width: '480px', maxWidth: '100%',
-        background: '#0a0c1a',
-        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border-md)',
         borderRadius: '16px',
         overflow: 'hidden',
         display: 'flex', flexDirection: 'column',
