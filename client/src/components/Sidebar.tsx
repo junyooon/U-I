@@ -18,15 +18,17 @@ import type { Category, GraphNode } from '../types'
 interface Props {
   categories: Category[]
   nodes: GraphNode[]
+  onSelectNode: (id: string) => void
 }
 
-export default function Sidebar({ categories, nodes }: Props) {
+export default function Sidebar({ categories, nodes, onSelectNode }: Props) {
   const { hiddenCategories, toggleCategory } = useGraphStore()
   const { data: intData } = useIntegrations()
   const connectGoogle = useConnectGoogle()
   const syncNow = useSyncNow()
   const { token, clearAuth } = useAuthStore()
 
+  const [query, setQuery] = useState('')
   const [showAddPerson, setShowAddPerson] = useState(false)
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [showNotificationSettings, setShowNotificationSettings] = useState(false)
@@ -109,6 +111,79 @@ export default function Sidebar({ categories, nodes }: Props) {
           <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>
             Your world of connections
           </p>
+        </div>
+
+        {/* Search */}
+        <div style={{ position: 'relative', marginBottom: '16px' }}>
+          <input
+            type="text"
+            placeholder="Search people…"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Escape') setQuery('') }}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              borderRadius: '8px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#fff',
+              fontSize: '13px',
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+          {query && (
+            <div style={{
+              position: 'absolute',
+              top: 'calc(100% + 4px)',
+              left: 0,
+              right: 0,
+              background: '#0d0f1e',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              overflow: 'hidden',
+              zIndex: 10,
+              maxHeight: '220px',
+              overflowY: 'auto',
+            }}>
+              {nodes.filter(n => n.name.toLowerCase().includes(query.toLowerCase())).length === 0 ? (
+                <p style={{ padding: '12px', fontSize: '13px', color: '#4b5563', fontStyle: 'italic' }}>No results</p>
+              ) : (
+                nodes
+                  .filter(n => n.name.toLowerCase().includes(query.toLowerCase()))
+                  .map(n => (
+                    <button
+                      key={n.id}
+                      onClick={() => { onSelectNode(n.id); setQuery('') }}
+                      style={{
+                        width: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '10px 12px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        color: '#e5e7eb',
+                        fontSize: '13px',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                    >
+                      <span style={{
+                        width: '8px', height: '8px', borderRadius: '50%',
+                        background: n.primary_color, flexShrink: 0,
+                        boxShadow: `0 0 6px ${n.primary_color}`,
+                      }} />
+                      {n.name}
+                    </button>
+                  ))
+              )}
+            </div>
+          )}
         </div>
 
         {/* Node count */}

@@ -10,6 +10,12 @@ export default function GraphPage() {
   const queryClient = useQueryClient()
   const [banner, setBanner] = useState<'connected' | 'error' | null>(null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [focusedNodeId, setFocusedNodeId] = useState<string | null>(null)
+
+  function selectNode(id: string) {
+    setSelectedNodeId(id)
+    setFocusedNodeId(id)
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
@@ -50,9 +56,9 @@ export default function GraphPage() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      <Sidebar categories={data.categories} nodes={data.nodes} />
+      <Sidebar categories={data.categories} nodes={data.nodes} onSelectNode={selectNode} />
       <div style={{ flex: 1, position: 'relative' }}>
-        <Scene data={data} onSelectNode={setSelectedNodeId} />
+        <Scene data={data} onSelectNode={selectNode} focusedNodeId={focusedNodeId} />
       </div>
       {selectedNodeId && (
         <ContactPanel

@@ -1,4 +1,5 @@
 import { useRef, useState, useMemo } from 'react'
+import type React from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Html } from '@react-three/drei'
 import * as THREE from 'three'
@@ -10,6 +11,7 @@ interface Props {
   total: number
   visible: boolean
   onSelect: (id: string) => void
+  positionsRef: React.RefObject<Map<string, THREE.Vector3>>
 }
 
 const DRIFT_SPEED = 0.0003 // radians/second at drift_velocity = 1.0
@@ -33,7 +35,7 @@ function fibonacciPoint(index: number, total: number, radius: number): THREE.Vec
   )
 }
 
-export default function ContactNode({ node, index, total, visible, onSelect }: Props) {
+export default function ContactNode({ node, index, total, visible, onSelect, positionsRef }: Props) {
   const groupRef = useRef<THREE.Group>(null)
   const [hovered, setHovered] = useState(false)
 
@@ -52,6 +54,7 @@ export default function ContactNode({ node, index, total, visible, onSelect }: P
     angleRef.current += node.drift_velocity * DRIFT_SPEED * delta
     const rotated = basePos.clone().applyAxisAngle(Y_AXIS, angleRef.current)
     groupRef.current.position.copy(rotated)
+    positionsRef.current?.set(node.id, groupRef.current.position.clone())
   })
 
   const daysSince = node.last_contact_at
