@@ -30,8 +30,10 @@ export function useRevokeShareToken() {
   })
 }
 
+const BASE = import.meta.env.VITE_API_BASE ?? '/api/v1'
+
 export async function fetchPublicGraph(shareToken: string): Promise<GraphData & { owner: string }> {
-  const res = await fetch(`/api/v1/share/${shareToken}`)
+  const res = await fetch(`${BASE}/share/${shareToken}`)
   if (!res.ok) throw new Error(`${res.status}`)
   return res.json()
 }
