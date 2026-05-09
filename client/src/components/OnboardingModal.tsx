@@ -197,7 +197,6 @@ export default function OnboardingModal({ onComplete, existingCategories }: Prop
                     >
                       <span>{c.emoji}</span>
                       {c.label}
-                      {active && <span style={{ color: c.color, fontSize: '11px' }}>✓</span>}
                     </button>
                   )
                 })}
