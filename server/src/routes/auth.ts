@@ -140,7 +140,8 @@ router.post('/oauth/google', async (req, res) => {
     const { tokens } = await oauth2Client.getToken(parsed.data.code)
     oauth2Client.setCredentials(tokens)
 
-    const people = google.people({ version: 'v1', auth: oauth2Client })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const people = google.people({ version: 'v1', auth: oauth2Client as any })
     const me = await people.people.get({
       resourceName: 'people/me',
       personFields: 'emailAddresses,names',

@@ -60,7 +60,8 @@ export async function syncGmail(userId: string) {
   const client = await makeClient(userId, 'google_email')
   if (!client) return
 
-  const gmail = google.gmail({ version: 'v1', auth: client })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const gmail = google.gmail({ version: 'v1', auth: client as any })
   const contacts = await prisma.contact.findMany({ where: { userId, email: { not: null } } })
 
   for (const contact of contacts) {
@@ -100,7 +101,8 @@ export async function syncCalendar(userId: string) {
   const client = await makeClient(userId, 'google_calendar')
   if (!client) return
 
-  const calendar = google.calendar({ version: 'v3', auth: client })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const calendar = google.calendar({ version: 'v3', auth: client as any })
   const contacts = await prisma.contact.findMany({ where: { userId, email: { not: null } } })
 
   for (const contact of contacts) {

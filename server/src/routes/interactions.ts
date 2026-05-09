@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import { z } from 'zod'
 import prisma from '../db/prisma'
 import { requireAuth } from '../middleware/auth'
@@ -7,7 +7,9 @@ import { computeDistance } from '../lib/distance'
 const router = Router({ mergeParams: true })
 router.use(requireAuth)
 
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
+  const { id: contactId } = req.params as { id: string }
+
   const schema = z.object({
     type: z.enum(['in_person', 'manual']),
     occurred_at: z.string().datetime(),
@@ -21,7 +23,7 @@ router.post('/', async (req, res) => {
   }
 
   const contact = await prisma.contact.findFirst({
-    where: { id: req.params.id, userId: req.userId },
+    where: { id: contactId, userId: req.userId },
   })
   if (!contact) {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Contact not found.' } })
@@ -68,13 +70,11 @@ router.post('/', async (req, res) => {
   })
 })
 
-router.delete('/:interactionId', async (req, res) => {
+router.delete('/:interactionId', async (req: Request, res: Response) => {
+  const { id: contactId, interactionId } = req.params as { id: string; interactionId: string }
+
   const interaction = await prisma.interaction.findFirst({
-    where: {
-      id: req.params.interactionId,
-      contactId: req.params.id,
-      userId: req.userId,
-    },
+    where: { id: interactionId, contactId, userId: req.userId },
   })
   if (!interaction) {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Interaction not found.' } })
@@ -84,7 +84,7 @@ router.delete('/:interactionId', async (req, res) => {
   await prisma.interaction.delete({ where: { id: interaction.id } })
 
   const latest = await prisma.interaction.findFirst({
-    where: { contactId: req.params.id },
+    where: { contactId },
     orderBy: { occurredAt: 'desc' },
   })
 
@@ -95,7 +95,7 @@ router.delete('/:interactionId', async (req, res) => {
   const distance = computeDistance(daysSince)
 
   await prisma.contact.update({
-    where: { id: req.params.id },
+    where: { id: contactId },
     data: { lastContactAt, driftScore: distance / 100, distance },
   })
 
