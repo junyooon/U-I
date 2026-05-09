@@ -1,6 +1,8 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY ?? 're_placeholder')
+}
 
 interface DriftingContact {
   name: string
@@ -25,7 +27,7 @@ export async function sendWeeklyDigest(
     </tr>
   `).join('')
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: toEmail,
     subject: `U&I — ${contacts.length} connection${contacts.length !== 1 ? 's' : ''} drifting this week`,
