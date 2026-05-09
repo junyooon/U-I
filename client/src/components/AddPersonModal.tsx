@@ -12,7 +12,16 @@ export default function AddPersonModal({ categories, onClose }: Props) {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [lastContact, setLastContact] = useState<number | null>(null)
+  const [lastContactSet, setLastContactSet] = useState(false)
   const createContact = useCreateContact()
+
+  function daysAgoToIso(days: number | null): string | null {
+    if (days === null) return null
+    const d = new Date()
+    d.setDate(d.getDate() - days)
+    return d.toISOString()
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -33,6 +42,7 @@ export default function AddPersonModal({ categories, onClose }: Props) {
       email: email.trim() || null,
       phone: phone.trim() || null,
       category_ids: selectedCategories,
+      ...(lastContactSet ? { last_contact_at: daysAgoToIso(lastContact) } : {}),
     })
     onClose()
   }
@@ -134,6 +144,41 @@ export default function AddPersonModal({ categories, onClose }: Props) {
               </div>
             </div>
           )}
+
+          <div>
+            <label style={labelStyle}>When did you last keep in touch?</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              {[
+                { label: 'Today', daysAgo: 0 },
+                { label: 'This week', daysAgo: 7 },
+                { label: 'This month', daysAgo: 30 },
+                { label: '3 months ago', daysAgo: 90 },
+                { label: 'Over a year', daysAgo: 400 },
+                { label: 'Never', daysAgo: null },
+              ].map(opt => {
+                const active = lastContactSet && lastContact === opt.daysAgo
+                return (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => { setLastContact(opt.daysAgo); setLastContactSet(true) }}
+                    style={{
+                      padding: '6px 14px',
+                      borderRadius: '20px',
+                      border: `1px solid ${active ? '#3b82f6' : 'rgba(255,255,255,0.1)'}`,
+                      background: active ? 'rgba(59,130,246,0.15)' : 'transparent',
+                      color: active ? '#93c5fd' : '#6b7280',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
 
           {createContact.error && (
             <p style={{ color: '#f87171', fontSize: '13px' }}>
